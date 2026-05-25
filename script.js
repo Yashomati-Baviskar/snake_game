@@ -11,6 +11,20 @@
   const speedMed = document.getElementById('speedMed');
   const speedFast = document.getElementById('speedFast');
   const levelButtons = Array.from(document.querySelectorAll('.level-btn'));
+  const skinButtons = Array.from(document.querySelectorAll('.skin-btn'));
+  const gameOverModal = document.getElementById('gameOverModal');
+  const modalScore = document.getElementById('modalScore');
+  const modalRestartBtn = document.getElementById('modalRestartBtn');
+
+  const SKIN_KEY = 'snake_skin';
+  const skinsConfig = {
+    classic: {req:0, head:'#0f0', body:'#6f6', shadow:'#0f0'},
+    neon: {req:10, head:'#3bf0ff', body:'#7ef2d6', shadow:'#3bf0ff'},
+    gradient: {req:20, head:null, body:null, shadow:'#ff3bca'},
+    gold: {req:35, head:'#ffd700', body:'#ffecb3', shadow:'#ffd700'},
+    shadow: {req:50, head:'#c16cff', body:'#8b5fbf', shadow:'#c16cff'},
+  };
+  let selectedSkin = localStorage.getItem(SKIN_KEY) || 'classic';
 
   const TILE = 20;
   const COLS = Math.floor(canvas.width / TILE);
@@ -66,6 +80,24 @@
 
   function updateScore(){ scoreEl.textContent = score; highEl.textContent = highscore; levelEl.textContent = level; }
 
+  function updateSkinButtons(){
+    skinButtons.forEach(b=>{
+      const key = b.dataset.skin;
+      const req = parseInt(b.dataset.required||'0',10);
+      if(score>=req){ b.classList.remove('locked'); b.classList.add('unlocked'); b.disabled=false; }
+      else { b.classList.add('locked'); b.classList.remove('unlocked'); b.disabled=true; }
+      if(key===selectedSkin){ b.classList.add('selected'); } else { b.classList.remove('selected'); }
+    });
+  }
+
+  skinButtons.forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const key = b.dataset.skin;
+      const req = parseInt(b.dataset.required||'0',10);
+      if(score>=req){ selectedSkin = key; localStorage.setItem(SKIN_KEY, selectedSkin); updateSkinButtons(); }
+    });
+  });
+
   function tick(){
     if(!running) return;
     const head = {x:snake[0].x+dir.x, y:snake[0].y+dir.y};
@@ -84,7 +116,7 @@
         tickDelay = Math.max(40, baseSpeeds[selectedSpeed] - (level-1)*12);
         playLevel(); updateLevelButtons(); updateInterval();
       } else { playEat(); }
-      placeFood(); updateScore();
+      placeFood(); updateScore(); updateSkinButtons();
     } else { snake.pop(); }
   }
 
@@ -99,10 +131,25 @@
     // food glow
     if(food){ ctx.fillStyle='#ffcc00'; ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 12; ctx.fillRect(food.x*TILE+2, food.y*TILE+2, TILE-4, TILE-4); ctx.shadowBlur=0; }
 
-    // snake
+    // snake with skin
+    const skin = skinsConfig[selectedSkin] || skinsConfig.classic;
+    // prepare gradient for gradient skin
+    let globalBodyStyle = null;
+    if(selectedSkin==='gradient'){
+      const g = ctx.createLinearGradient(0,0,canvas.width,0);
+      g.addColorStop(0,'#ff3bca'); g.addColorStop(1,'#3bf0ff');
+      globalBodyStyle = g;
+    }
     snake.forEach((s,i)=>{
-      if(i===0){ ctx.fillStyle='#3bf0ff'; ctx.shadowColor='#3bf0ff'; ctx.shadowBlur=18; }
-      else { ctx.fillStyle='#7ef2d6'; ctx.shadowBlur=6; }
+      if(i===0){
+        const headColor = skin.head || '#3bf0ff';
+        ctx.fillStyle = headColor;
+        ctx.shadowColor = skin.shadow || headColor;
+        ctx.shadowBlur = 18;
+      } else {
+        ctx.fillStyle = globalBodyStyle || skin.body || '#7ef2d6';
+        ctx.shadowBlur = 6;
+      }
       ctx.fillRect(s.x*TILE+2, s.y*TILE+2, TILE-4, TILE-4);
       ctx.shadowBlur=0;
     });
@@ -125,7 +172,28 @@
     if(running) tickInterval = setInterval(()=>{ tick(); draw(); }, tickDelay);
   }
 
-  function endGame(){ running=false; clearInterval(tickInterval); canvas.classList.remove('canvas-border-glow'); playGameOver(); if(score>highscore){ highscore=score; localStorage.setItem(HIGH_KEY,String(highscore)); } updateScore(); }
+  function endGame(){
+    running=false;
+    clearInterval(tickInterval);
+    canvas.classList.remove('canvas-border-glow');
+    playGameOver();
+    if(score>highscore){ highscore=score; localStorage.setItem(HIGH_KEY,String(highscore)); }
+    updateScore();
+    showGameOver();
+  }
+
+  // show game over modal and allow restart
+  function showGameOver(){
+    modalScore.textContent = score;
+    gameOverModal.setAttribute('aria-hidden','false');
+    modalRestartBtn.focus();
+  }
+
+  modalRestartBtn.addEventListener('click', ()=>{
+    gameOverModal.setAttribute('aria-hidden','true');
+    reset();
+    startGame();
+  });
 
   // controls
   startBtn.addEventListener('click', ()=>{ startGame(); });
@@ -198,4 +266,4 @@
   });
 
   // init
-  reset(); setSpeed(selectedSpeed); updateLevelButtons(); draw();
+  reset(); setSpeed(selectedSpeed); updateLevelButtons(); updateSkinButtons(); draw();

@@ -48,6 +48,43 @@
     </div>
   </div>
 
+  <div class="skins-section">
+    <label>Skins:</label>
+    <div id="skins" class="skins">
+      <button class="skin-btn" data-skin="classic" data-required="0">
+        <span class="swatch classic"></span>
+        <small>Classic</small>
+      </button>
+      <button class="skin-btn" data-skin="neon" data-required="10">
+        <span class="swatch neon"></span>
+        <small>Neon (10)</small>
+      </button>
+      <button class="skin-btn" data-skin="gradient" data-required="20">
+        <span class="swatch gradient"></span>
+        <small>Gradient (20)</small>
+      </button>
+      <button class="skin-btn" data-skin="gold" data-required="35">
+        <span class="swatch gold"></span>
+        <small>Gold (35)</small>
+      </button>
+      <button class="skin-btn" data-skin="shadow" data-required="50">
+        <span class="swatch shadow"></span>
+        <small>Shadow (50)</small>
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div id="gameOverModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h2>Game Over</h2>
+      <p>Your score: <strong id="modalScore">0</strong></p>
+      <div class="modal-actions">
+        <button id="modalRestartBtn" class="btn primary">Restart</button>
+      </div>
+    </div>
+  </div>
+
   <div class="hint">Use arrow keys to move. Press Space to restart.</div>
   <script src="script.js"></script>
 </body>
