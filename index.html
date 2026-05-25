@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Neon Snake Arena</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hud">
+    <h1 class="title">Neon Snake Arena</h1>
+    <div class="scores">
+      <div>Score: <span id="score">0</span></div>
+      <div>High: <span id="highscore">0</span></div>
+    </div>
+  </header>
+
+  <main class="game-area">
+    <canvas id="gameCanvas" width="600" height="600"></canvas>
+
+    <div id="overlay" class="overlay">
+      <div class="menu">
+        <h2>Neon Snake Arena</h2>
+        <p>Eat food. Grow. Don't hit walls or yourself.</p>
+        <div class="menu-buttons">
+          <button id="startBtn" class="btn primary">Start Game</button>
+          <button id="aiBtn" class="btn">Play vs AI (Soon)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="pauseBtn" class="btn">Pause</button>
+      <button id="restartBtn" class="btn">Restart</button>
+    </div>
+  </main>
+
+  <footer class="footer">Made with <span class="heart">♥</span></footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
