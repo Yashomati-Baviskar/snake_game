@@ -14,11 +14,22 @@ Features implemented:
 
 To run locally, open `index.html` in a browser (double-click or serve with a static server).
 
-Planned next steps:
+This repository now contains a very small, minimal Snake game.
 
-- Mobile touch controls
-- Improved animations and particle effects
-- AI snake mode
-- Multiplayer
+To run:
+
+```bash
+python3 -m http.server 8000
+# open http://localhost:8000
+```
+
+Controls:
+- Arrow keys to move
+- Space to restart
+
+Files:
+- `index.html` — page with canvas
+- `styles.css` — minimal styles
+- `script.js` — simple game logic
 
 Enjoy! 🎮

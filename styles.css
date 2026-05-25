@@ -1,37 +1,6 @@
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg1:#05060a;
-  --bg2:#0b0f1a;
-  --neon:#3bf0ff;
-  --accent:#ff3bca;
-  --glass: rgba(255,255,255,0.03);
-}
-html,body{height:100%;font-family:Poppins,system-ui,Segoe UI,Arial}
-body{
-  background: radial-gradient(1200px 600px at 10% 10%, rgba(59,240,255,0.06), transparent),
-              radial-gradient(900px 400px at 90% 90%, rgba(255,59,202,0.04), transparent),
-              linear-gradient(180deg,var(--bg1),var(--bg2));
-  color:#e6f7ff;
-  display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px
-}
-.hud{width:100%;max-width:960px;display:flex;justify-content:space-between;align-items:center}
-.title{font-family:Orbitron, sans-serif;font-size:1.6rem;color:var(--neon);text-shadow:0 0 12px rgba(59,240,255,0.2)}
-.scores{display:flex;gap:16px;font-weight:600}
-.game-area{position:relative;width:100%;max-width:960px;display:flex;flex-direction:column;align-items:center}
-canvas{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.15));border-radius:12px;box-shadow:0 8px 30px rgba(2,8,23,0.6),0 0 30px rgba(59,240,255,0.03) inset}
-.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.menu{background:var(--glass);backdrop-filter:blur(6px);padding:28px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);text-align:center;box-shadow:0 6px 30px rgba(0,0,0,0.6)}
-.menu h2{font-family:Orbitron;margin-bottom:8px;color:var(--neon)}
-.menu p{margin-bottom:14px;color:#bfeff6}
-.menu-buttons{display:flex;gap:12px;justify-content:center}
-.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 16px;border-radius:8px;color:#dff8ff;cursor:pointer;transition:all .12s;box-shadow:0 4px 18px rgba(0,0,0,0.6)}
-.btn.primary{background:linear-gradient(90deg,var(--neon),var(--accent));color:#051018;font-weight:700;border:none;text-shadow:none}
-.btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,0.7)}
-.controls{margin-top:12px;display:flex;gap:8px}
-.footer{opacity:.6}
-.heart{color:var(--accent)}
-/* Responsive */
-@media (max-width:640px){
-  canvas{width:92vw;height:92vw}
-  .hud{padding:0 6px}
-}
+/* Minimal styles for the simple snake game */
+body{font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px;background:#111;color:#fff}
+h1{font-size:20px;margin:6px}
+.info{font-weight:600}
+canvas{background:#000;border:2px solid #333}
+.hint{opacity:.8;font-size:13px;margin-top:8px}
