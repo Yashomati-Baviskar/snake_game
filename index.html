@@ -3,13 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Simple Snake</title>
+  <title>Snake Arena</title>
   <link rel="stylesheet" href="styles.css">
-}</head>
+</head>
 <body>
-  <h1>Simple Snake</h1>
-  <div class="info">Score: <span id="score">0</span></div>
-  <canvas id="game" width="400" height="400"></canvas>
+  <header class="hud">
+    <h1 class="title">Simple Snake</h1>
+    <div class="scores">
+      <div>Score: <span id="score">0</span></div>
+      <div>High: <span id="high">0</span></div>
+    </div>
+  </header>
+
+  <div class="stage">
+    <canvas id="game" width="400" height="400"></canvas>
+  </div>
+
+  <div class="controls">
+    <button id="startBtn" class="btn primary">Start</button>
+    <button id="pauseBtn" class="btn">Pause</button>
+    <button id="restartBtn" class="btn">Restart</button>
+    <button id="themeBtn" class="btn">Light</button>
+  </div>
+
   <div class="hint">Use arrow keys to move. Press Space to restart.</div>
   <script src="script.js"></script>
 </body>

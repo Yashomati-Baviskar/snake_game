@@ -1,6 +1,28 @@
 /* Minimal styles for the simple snake game */
-body{font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px;background:#111;color:#fff}
-h1{font-size:20px;margin:6px}
-.info{font-weight:600}
-canvas{background:#000;border:2px solid #333}
+body{font-family:Inter, system-ui, -apple-system, Arial, sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px;margin:0;min-height:100vh;background:#05060a;color:#e6fbff}
+/* animated radial glow */
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(600px 300px at 10% 10%, rgba(59,240,255,0.06), transparent),radial-gradient(500px 200px at 90% 90%, rgba(255,59,202,0.04), transparent)}
+.hud{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center}
+.title{font-family:Orbitron, sans-serif;font-size:1.4rem;color:#3bf0ff;text-shadow:0 0 18px rgba(59,240,255,0.12)}
+.scores{font-weight:700;display:flex;gap:14px}
+.stage{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));padding:12px;border-radius:14px;box-shadow:0 8px 30px rgba(2,8,23,0.7),0 0 40px rgba(59,240,255,0.03) inset}
+canvas{background:#000;border-radius:10px;display:block}
+.controls{display:flex;gap:10px;margin-top:6px}
+.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:#dff8ff;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.btn.primary{background:linear-gradient(90deg,#3bf0ff,#ff3bca);color:#041018;font-weight:700;border:none}
+.btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,0.6)}
 .hint{opacity:.8;font-size:13px;margin-top:8px}
+
+@media (max-width:520px){
+	.stage{padding:8px}
+	canvas{width:320px;height:320px}
+}
+
+/* Light theme overrides */
+.light{background:#f6f8fb;color:#08121a}
+.light body{}
+.light .stage{background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.04));}
+.light canvas{background:#fff;border:1px solid #e6e6e6}
+.light .title{color:#0b5bd6;text-shadow:none}
+.light .btn{color:#05202a;border:1px solid rgba(2,8,23,0.06)}
+.light .btn.primary{color:#fff}
