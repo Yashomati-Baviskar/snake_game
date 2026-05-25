@@ -8,93 +8,106 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="hud">
-    <h1 class="title">Snake Arcade</h1>
-    <div class="scores">
-      <div>Score: <span id="score">0</span></div>
-      <div>Level: <span id="level">1</span></div>
-      <div>High: <span id="high">0</span></div>
+  <div class="page">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" aria-label="menu">☰</button>
+        <span class="top-title">Snake Arcade</span>
+      </div>
+      <div class="topbar-right">
+        <div class="scores compact">
+          <div>Score: <span id="score">0</span></div>
+          <div>Level: <span id="level">1</span></div>
+          <div>High: <span id="high">0</span></div>
+        </div>
+      </div>
+    </nav>
+
+  <main class="main">
+    <aside class="sidebar">
+      <div class="controls">
+        <button id="startBtn" class="btn primary">Start</button>
+        <button id="pauseBtn" class="btn">Pause</button>
+        <button id="restartBtn" class="btn">Restart</button>
+        <button id="themeBtn" class="btn">Light</button>
+      </div>
+
+      <div class="speed-controls">
+        <label>Speed:</label>
+        <div class="speed-group">
+          <button id="speedSlow" class="btn">Slow</button>
+          <button id="speedMed" class="btn primary">Medium</button>
+          <button id="speedFast" class="btn">Fast</button>
+        </div>
+      </div>
+
+      <div class="level-controls">
+        <label>Levels:</label>
+        <div id="levelButtons" class="level-buttons">
+          <button class="level-btn" data-level="1">1</button>
+          <button class="level-btn" data-level="2">2</button>
+          <button class="level-btn" data-level="3">3</button>
+          <button class="level-btn" data-level="4">4</button>
+          <button class="level-btn" data-level="5">5</button>
+        </div>
+      </div>
+
+      <div class="skins-section">
+        <label>Skins:</label>
+        <div id="skins" class="skins">
+          <button class="skin-btn" data-skin="classic" data-required="0">
+            <span class="swatch classic"></span>
+            <small>Classic</small>
+          </button>
+          <button class="skin-btn" data-skin="neon" data-required="10">
+            <span class="swatch neon"></span>
+            <small>Neon (10)</small>
+          </button>
+          <button class="skin-btn" data-skin="gradient" data-required="20">
+            <span class="swatch gradient"></span>
+            <small>Gradient (20)</small>
+          </button>
+          <button class="skin-btn" data-skin="gold" data-required="35">
+            <span class="swatch gold"></span>
+            <small>Gold (35)</small>
+          </button>
+          <button class="skin-btn" data-skin="shadow" data-required="50">
+            <span class="swatch shadow"></span>
+            <small>Shadow (50)</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="types-section">
+        <label>Types:</label>
+        <div id="types" class="types">
+          <button class="type-btn" data-type="block" data-required="0">
+            <span class="type-swatch block"></span>
+            <small>Block</small>
+          </button>
+          <button class="type-btn" data-type="rounded" data-required="15">
+            <span class="type-swatch rounded"></span>
+            <small>Rounded (15)</small>
+          </button>
+          <button class="type-btn" data-type="pixel" data-required="30">
+            <span class="type-swatch pixel"></span>
+            <small>Pixel (30)</small>
+          </button>
+          <button class="type-btn" data-type="fat" data-required="45">
+            <span class="type-swatch fat"></span>
+            <small>Fat (45)</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="hint">Use arrow keys to move. Press Space to restart.</div>
+    </aside>
+
+    <div class="stage large-stage">
+      <canvas id="game" width="640" height="640"></canvas>
     </div>
-  </header>
-
-  <div class="stage">
-    <canvas id="game" width="400" height="400"></canvas>
-  </div>
-
-  <div class="controls">
-    <button id="startBtn" class="btn primary">Start</button>
-    <button id="pauseBtn" class="btn">Pause</button>
-    <button id="restartBtn" class="btn">Restart</button>
-    <button id="themeBtn" class="btn">Light</button>
-  </div>
-
-  <div class="speed-controls">
-    <label>Speed:</label>
-    <div class="speed-group">
-      <button id="speedSlow" class="btn">Slow</button>
-      <button id="speedMed" class="btn primary">Medium</button>
-      <button id="speedFast" class="btn">Fast</button>
-    </div>
-  </div>
-
-  <div class="level-controls">
-    <label>Levels:</label>
-    <div id="levelButtons" class="level-buttons">
-      <button class="level-btn" data-level="1">1</button>
-      <button class="level-btn" data-level="2">2</button>
-      <button class="level-btn" data-level="3">3</button>
-      <button class="level-btn" data-level="4">4</button>
-      <button class="level-btn" data-level="5">5</button>
-    </div>
-  </div>
-
-  <div class="skins-section">
-    <label>Skins:</label>
-    <div id="skins" class="skins">
-      <button class="skin-btn" data-skin="classic" data-required="0">
-        <span class="swatch classic"></span>
-        <small>Classic</small>
-      </button>
-      <button class="skin-btn" data-skin="neon" data-required="10">
-        <span class="swatch neon"></span>
-        <small>Neon (10)</small>
-      </button>
-      <button class="skin-btn" data-skin="gradient" data-required="20">
-        <span class="swatch gradient"></span>
-        <small>Gradient (20)</small>
-      </button>
-      <button class="skin-btn" data-skin="gold" data-required="35">
-        <span class="swatch gold"></span>
-        <small>Gold (35)</small>
-      </button>
-      <button class="skin-btn" data-skin="shadow" data-required="50">
-        <span class="swatch shadow"></span>
-        <small>Shadow (50)</small>
-      </button>
-    </div>
-  </div>
-
-  <div class="types-section">
-    <label>Types:</label>
-    <div id="types" class="types">
-      <button class="type-btn" data-type="block" data-required="0">
-        <span class="type-swatch block"></span>
-        <small>Block</small>
-      </button>
-      <button class="type-btn" data-type="rounded" data-required="15">
-        <span class="type-swatch rounded"></span>
-        <small>Rounded (15)</small>
-      </button>
-      <button class="type-btn" data-type="pixel" data-required="30">
-        <span class="type-swatch pixel"></span>
-        <small>Pixel (30)</small>
-      </button>
-      <button class="type-btn" data-type="fat" data-required="45">
-        <span class="type-swatch fat"></span>
-        <small>Fat (45)</small>
-      </button>
-    </div>
-  </div>
+  </main>
+  </div><!-- /.page -->
 
   <!-- Game Over Modal -->
   <div id="gameOverModal" class="modal" aria-hidden="true">
@@ -106,8 +119,6 @@
       </div>
     </div>
   </div>
-
-  <div class="hint">Use arrow keys to move. Press Space to restart.</div>
   <script src="script.js"></script>
 </body>
 </html>

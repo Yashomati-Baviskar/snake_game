@@ -37,10 +37,24 @@
   };
   let selectedType = localStorage.getItem(TYPE_KEY) || 'block';
 
+  // Initial canvas setup - only once on load
+  function initializeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+  
   const TILE = 20;
-  const COLS = Math.floor(canvas.width / TILE);
-  const ROWS = Math.floor(canvas.height / TILE);
-  let snake = [{x:5,y:5}];
+  const WALL_WIDTH = 1; // Wall thickness in tiles
+  let COLS = Math.floor(canvas.width / TILE);
+  let ROWS = Math.floor(canvas.height / TILE);
+  
+  // Calculate playable area boundaries (inside walls)
+  let playAreaX = WALL_WIDTH;
+  let playAreaY = WALL_WIDTH;
+  let playAreaWidth = COLS - WALL_WIDTH * 2;
+  let playAreaHeight = ROWS - WALL_WIDTH * 2;
+  
+  let snake = [{x: WALL_WIDTH + Math.floor(playAreaWidth/2), y: WALL_WIDTH + Math.floor(playAreaHeight/2)}];
   let dir = {x:1,y:0};
   let food = null;
   let score = 0;
@@ -48,7 +62,9 @@
   const levelEl = document.getElementById('level');
   let tickDelay = 120; // ms
   let running = false;
-  let tickInterval = null;
+  let rafId = null;
+  let lastFrameTime = 0;
+  let accumulator = 0; // ms
   let selectedSpeed = 'med';
   const baseSpeeds = { slow: 180, med: 120, fast: 70 };
   let unlockedLevel = 1; // highest unlocked level
@@ -57,12 +73,38 @@
   let highscore = parseInt(localStorage.getItem(HIGH_KEY) || '0', 10);
   highEl.textContent = highscore;
 
+  // Check if a position is inside playable area (not in walls)
+  function isInPlayArea(x, y) {
+    return x >= playAreaX && x < playAreaX + playAreaWidth && 
+           y >= playAreaY && y < playAreaY + playAreaHeight;
+  }
+
   function placeFood(){
     while(true){
-      const x = Math.floor(Math.random()*COLS);
-      const y = Math.floor(Math.random()*ROWS);
+      const x = playAreaX + Math.floor(Math.random() * playAreaWidth);
+      const y = playAreaY + Math.floor(Math.random() * playAreaHeight);
       if(!snake.some(s=>s.x===x&&s.y===y)){ food={x,y}; break; }
     }
+  }
+
+  // Only update canvas size on window resize
+  function resizeCanvasOnWindowResize() {
+    const newW = canvas.offsetWidth;
+    const newH = canvas.offsetHeight;
+    const dpr = window.devicePixelRatio || 1;
+    
+    canvas.width = newW * dpr;
+    canvas.height = newH * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    
+    COLS = Math.max(5, Math.floor(newW / TILE));
+    ROWS = Math.max(5, Math.floor(newH / TILE));
+    
+    // Recalculate playable area
+    playAreaX = WALL_WIDTH;
+    playAreaY = WALL_WIDTH;
+    playAreaWidth = Math.max(3, COLS - WALL_WIDTH * 2);
+    playAreaHeight = Math.max(3, ROWS - WALL_WIDTH * 2);
   }
 
   // audio
@@ -83,12 +125,33 @@
   function playGameOver(){ playTone(200,0.3,0.08,'sine'); }
 
   function reset(){
-    // start the snake just outside the top wall so it comes in from outside
-    snake = [{x: Math.floor(COLS/2), y: -1}];
-    // move inward from the top
+    // Start snake in center of playable area
+    const centerX = playAreaX + Math.floor(playAreaWidth / 2);
+    const centerY = playAreaY + Math.floor(playAreaHeight / 2);
+    snake = [{x: centerX, y: centerY}];
+    // Move right
+    dir = {x:1, y:0};
+    score=0; level=1; unlockedLevel=1; selectedSpeed='med'; tickDelay=baseSpeeds[selectedSpeed]; updateScore(); placeFood(); draw();
+    // stop RAF loop if running
+    running = false;
+    if(rafId) cancelAnimationFrame(rafId);
+    rafId = null; lastFrameTime = 0; accumulator = 0;
+    canvas.classList.remove('canvas-border-glow');
+  }
+
+  // Reset snake to enter from top of playable area (for unknown key press)
+  function resetSnakeFromTop(){
+    // Position snake at top row, just above playable area to enter downward
+    const centerX = playAreaX + Math.floor(playAreaWidth / 2);
+    const startY = playAreaY; // First row of playable area
+    snake = [{x: centerX, y: startY - 1}];
+    // Move downward
     dir = {x:0, y:1};
-    score=0; level=1; unlockedLevel=1; selectedSpeed='med'; tickDelay=baseSpeeds[selectedSpeed]; running=false; updateScore(); placeFood(); draw();
-    clearInterval(tickInterval);
+    score=0; level=1; unlockedLevel=1; selectedSpeed='med'; tickDelay=baseSpeeds[selectedSpeed]; updateScore(); placeFood(); draw();
+    // Stop any running game
+    running = false;
+    if(rafId) cancelAnimationFrame(rafId);
+    rafId = null; lastFrameTime = 0; accumulator = 0;
     canvas.classList.remove('canvas-border-glow');
   }
 
@@ -135,9 +198,9 @@
   function tick(){
     if(!running) return;
     const head = {x:snake[0].x+dir.x, y:snake[0].y+dir.y};
-    // wall
-    if(head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS){ endGame(); return; }
-    // self
+    // wall collision - check if head is in play area
+    if(!isInPlayArea(head.x, head.y)){ endGame(); return; }
+    // self collision
     if(snake.some(s=>s.x===head.x&&s.y===head.y)){ endGame(); return; }
     snake.unshift(head);
     if(food && head.x===food.x&&head.y===food.y){
@@ -158,22 +221,64 @@
   }
 
   function draw(){
-    // background
-    ctx.fillStyle='#020204'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    // Use current canvas dimensions (set during resize, not here)
+    const dpr = window.devicePixelRatio || 1;
+    const displayW = canvas.width / dpr;
+    const displayH = canvas.height / dpr;
+    
+    // Theme-aware colors
+    const isLight = document.body.classList.contains('light');
+    const bgColor = isLight ? '#f8f9fc' : '#020204';
+    const wallColor = isLight ? '#0077cc' : '#3bf0ff';
+    const gridColor = isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)';
+    const shadowColor = isLight ? 'rgba(0,119,204,0.15)' : 'rgba(59,240,255,0.15)';
+    
+    // fill background
+    ctx.fillStyle = bgColor; ctx.fillRect(0,0,displayW,displayH);
+    
+    // draw playable area border (walls)
+    ctx.save();
+    const cellW = displayW / Math.max(1, COLS);
+    const cellH = displayH / Math.max(1, ROWS);
+    
+    // Calculate wall positions in pixels
+    const wallPixelX = playAreaX * cellW;
+    const wallPixelY = playAreaY * cellH;
+    const wallPixelW = playAreaWidth * cellW;
+    const wallPixelH = playAreaHeight * cellH;
+    
+    const wallLine = 8;
+    ctx.lineWidth = wallLine;
+    ctx.strokeStyle = wallColor;
+    ctx.shadowColor = wallColor;
+    ctx.shadowBlur = 18;
+    
+    // Draw playable area border (with outer area as wall)
+    const inset = Math.max(2, Math.ceil(wallLine/2));
+    ctx.strokeRect(wallPixelX - inset, wallPixelY - inset, wallPixelW + inset*2, wallPixelH + inset*2);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+    
     // subtle grid
-    ctx.strokeStyle='rgba(255,255,255,0.02)'; ctx.lineWidth=1;
-    for(let x=0;x<=COLS;x++){ ctx.beginPath(); ctx.moveTo(x*TILE,0); ctx.lineTo(x*TILE,canvas.height); ctx.stroke(); }
-    for(let y=0;y<=ROWS;y++){ ctx.beginPath(); ctx.moveTo(0,y*TILE); ctx.lineTo(canvas.width,y*TILE); ctx.stroke(); }
+    ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+    for(let x=0;x<=COLS;x++){ const gx = Math.round(x * cellW); ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,displayH); ctx.stroke(); }
+    for(let y=0;y<=ROWS;y++){ const gy = Math.round(y * cellH); ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(displayW,gy); ctx.stroke(); }
 
-    // food glow
-    if(food){ ctx.fillStyle='#ffcc00'; ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 12; ctx.fillRect(food.x*TILE+2, food.y*TILE+2, TILE-4, TILE-4); ctx.shadowBlur=0; }
+    // food
+    if(food){
+      const fx = Math.round(food.x * cellW);
+      const fy = Math.round(food.y * cellH);
+      ctx.fillStyle = '#ffcc00'; ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 12;
+      ctx.fillRect(fx + 2, fy + 2, Math.max(4, Math.floor(cellW - 4)), Math.max(4, Math.floor(cellH - 4)));
+      ctx.shadowBlur = 0;
+    }
 
     // snake with skin
     const skin = skinsConfig[selectedSkin] || skinsConfig.classic;
     // prepare gradient for gradient skin
     let globalBodyStyle = null;
     if(selectedSkin==='gradient'){
-      const g = ctx.createLinearGradient(0,0,canvas.width,0);
+      const g = ctx.createLinearGradient(0,0,displayW,0);
       g.addColorStop(0,'#ff3bca'); g.addColorStop(1,'#3bf0ff');
       globalBodyStyle = g;
     }
@@ -187,19 +292,21 @@
         ctx.fillStyle = globalBodyStyle || skin.body || '#7ef2d6';
         ctx.shadowBlur = 6;
       }
-      const px = s.x * TILE;
-      const py = s.y * TILE;
+      const px = s.x * cellW;
+      const py = s.y * cellH;
+      const w = Math.max(4, Math.floor(cellW));
+      const h = Math.max(4, Math.floor(cellH));
       if(selectedType === 'rounded'){
         ctx.beginPath();
-        ctx.arc(px + TILE/2, py + TILE/2, (TILE-4)/2, 0, Math.PI*2);
+        ctx.arc(px + cellW/2, py + cellH/2, Math.max(4, Math.min(cellW,cellH)/2 - 2), 0, Math.PI*2);
         ctx.fill();
       } else if(selectedType === 'pixel'){
-        const sz = Math.max(6, Math.floor(TILE/2));
-        ctx.fillRect(px + Math.floor(TILE/2 - sz/2), py + Math.floor(TILE/2 - sz/2), sz, sz);
+        const sz = Math.max(6, Math.floor(Math.min(cellW,cellH)/2));
+        ctx.fillRect(px + Math.floor(cellW/2 - sz/2), py + Math.floor(cellH/2 - sz/2), sz, sz);
       } else if(selectedType === 'fat'){
-        ctx.fillRect(px + 1, py + 1, TILE-2, TILE-2);
+        ctx.fillRect(px + 1, py + 1, Math.max(2,w-2), Math.max(2,h-2));
       } else {
-        ctx.fillRect(px + 2, py + 2, TILE-4, TILE-4);
+        ctx.fillRect(px + 2, py + 2, Math.max(2,w-4), Math.max(2,h-4));
       }
       ctx.shadowBlur=0;
     });
@@ -224,25 +331,41 @@
   }
 
   function startGame(){
-    if(!running){ running=true; clearInterval(tickInterval); tickInterval = setInterval(()=>{ tick(); draw(); }, tickDelay); pauseBtn.textContent = 'Pause'; canvas.classList.add('canvas-border-glow'); }
+    if(!running){
+      running = true;
+      pauseBtn.textContent = 'Pause';
+      canvas.classList.add('canvas-border-glow');
+      // start RAF loop
+      lastFrameTime = performance.now();
+      accumulator = 0;
+      function loop(now){
+        const delta = now - lastFrameTime; lastFrameTime = now;
+        accumulator += delta;
+        // advance game ticks as needed
+        while(accumulator >= tickDelay){ tick(); accumulator -= tickDelay; }
+        draw();
+        if(running) rafId = requestAnimationFrame(loop);
+      }
+      rafId = requestAnimationFrame(loop);
+    }
   }
 
   function togglePause(){
     if(running){
-      running = false; clearInterval(tickInterval); pauseBtn.textContent = 'Resume';
+      running = false; if(rafId) cancelAnimationFrame(rafId); rafId = null; pauseBtn.textContent = 'Resume';
     } else {
       startGame();
     }
   }
 
   function updateInterval(){
-    if(tickInterval) clearInterval(tickInterval);
-    if(running) tickInterval = setInterval(()=>{ tick(); draw(); }, tickDelay);
+    // tickDelay updated elsewhere; RAF loop will pick up the new value automatically
+    // nothing to do here for RAF-based loop
   }
 
   function endGame(){
     running=false;
-    clearInterval(tickInterval);
+    if(rafId) cancelAnimationFrame(rafId); rafId = null;
     canvas.classList.remove('canvas-border-glow');
     playGameOver();
     if(score>highscore){ highscore=score; localStorage.setItem(HIGH_KEY,String(highscore)); }
@@ -303,10 +426,26 @@
   setSpeed(selectedSpeed);
   updateLevelButtons();
 
-  // theme toggle
+  // theme toggle with persistence
+  const THEME_KEY = 'snake_theme';
+  function setTheme(isDark) {
+    if (isDark) {
+      document.body.classList.remove('light');
+      themeBtn.textContent = 'Light';
+      localStorage.setItem(THEME_KEY, 'dark');
+    } else {
+      document.body.classList.add('light');
+      themeBtn.textContent = 'Dark';
+      localStorage.setItem(THEME_KEY, 'light');
+    }
+  }
+  // Load saved theme on startup
+  const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+  setTheme(savedTheme === 'dark');
+  
   themeBtn.addEventListener('click', ()=>{
-    const isLight = document.body.classList.toggle('light');
-    themeBtn.textContent = isLight ? 'Dark' : 'Light';
+    const isLight = document.body.classList.contains('light');
+    setTheme(isLight); // if it's light, set to dark; if dark, set to light
   });
 
   // keyboard with pause on unwanted keys
@@ -328,10 +467,16 @@
       if(e.key==='ArrowRight' && dir.x===0) dir={x:1,y:0};
       if(e.code==='Space') reset();
     } else {
-      // pause on any other key while running
-      if(running) togglePause();
+      // Unknown key: pause game and reset snake to enter from top row
+      resetSnakeFromTop();
     }
   });
 
   // init
-  reset(); setSpeed(selectedSpeed); updateLevelButtons(); updateSkinButtons(); updateTypeButtons(); draw();
+  // Initialize canvas size on load
+  initializeCanvas();
+  resizeCanvasOnWindowResize();
+  setSpeed(selectedSpeed); updateLevelButtons(); updateSkinButtons(); updateTypeButtons(); reset(); draw();
+
+  // Only resize canvas on window resize (not during gameplay)
+  window.addEventListener('resize', ()=>{ resizeCanvasOnWindowResize(); draw(); });

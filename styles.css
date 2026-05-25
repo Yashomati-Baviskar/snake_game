@@ -1,80 +1,140 @@
-/* Minimal styles for the simple snake game */
-body{font-family:Poppins, Inter, system-ui, -apple-system, Arial, sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px;margin:0;min-height:100vh;background:#05060a;color:#e6fbff}
-/* animated radial glow */
-body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(600px 300px at 10% 10%, rgba(59,240,255,0.06), transparent),radial-gradient(500px 200px at 90% 90%, rgba(255,59,202,0.04), transparent)}
-.hud{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center}
-.title{font-family:Orbitron, sans-serif;font-size:1.4rem;color:#3bf0ff;text-shadow:0 0 18px rgba(59,240,255,0.12)}
-.scores{font-weight:700;display:flex;gap:14px}
-.stage{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));padding:12px;border-radius:14px;box-shadow:0 8px 30px rgba(2,8,23,0.7),0 0 40px rgba(59,240,255,0.03) inset;position:relative}
-.stage::after{content:"";position:absolute;inset:6px;border-radius:10px;pointer-events:none;box-shadow:0 0 24px rgba(59,240,255,0.08), inset 0 0 18px rgba(59,240,255,0.02)}
-canvas{background:#000;border-radius:10px;display:block;border:3px solid rgba(59,240,255,0.06)}
-
-.canvas-border-glow{box-shadow:0 0 22px rgba(59,240,255,0.12), inset 0 0 18px rgba(59,240,255,0.06)}
-.controls{display:flex;gap:10px;margin-top:6px}
-.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:#dff8ff;cursor:pointer;transition:transform .12s,box-shadow .12s}
-.btn.primary{background:linear-gradient(90deg,#3bf0ff,#ff3bca);color:#041018;font-weight:700;border:none}
-.btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,0.6)}
-.hint{opacity:.8;font-size:13px;margin-top:8px}
-
-.speed-controls{margin-top:8px;display:flex;align-items:center;gap:10px}
-.speed-group{display:flex;gap:8px}
-.speed-group .btn.primary{outline:2px solid rgba(255,255,255,0.03)}
-
-.level-controls{margin-top:8px;display:flex;align-items:center;gap:10px}
-.level-buttons{display:flex;gap:8px}
-.level-btn{width:36px;height:36px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#dff8ff;font-weight:700}
-.level-btn.locked{opacity:0.35;filter:grayscale(40%);cursor:not-allowed}
-.level-btn.unlocked{box-shadow:0 6px 18px rgba(59,240,255,0.06);border-color:rgba(59,240,255,0.12)}
-
-@media (max-width:520px){
-	.stage{padding:8px}
-	canvas{width:320px;height:320px}
+/* Snake Arcade - Professional Fullscreen Cyberpunk Arcade Dashboard */
+:root{
+  /* Dark Theme (Default) */
+  --bg:#01020a;
+  --bg-secondary:#0a0f1a;
+  --bg-tertiary:#050810;
+  --text-primary:#e6fbff;
+  --text-secondary:#a0c8d8;
+  --border-color:rgba(59,240,255,0.1);
+  --border-color-strong:rgba(59,240,255,0.2);
+  --neon-cyan:#3bf0ff;
+  --neon-purple:#ff3bca;
+  --accent:linear-gradient(90deg,var(--neon-cyan),var(--neon-purple));
+  --shadow-sm:0 4px 16px rgba(0,0,0,0.3);
+  --shadow-md:0 8px 32px rgba(0,0,0,0.4);
+  --shadow-lg:0 30px 100px rgba(0,0,0,0.7);
+  --glow-sm:0 0 20px rgba(59,240,255,0.1);
+  --glow-md:0 0 40px rgba(59,240,255,0.15);
+  --glow-lg:0 0 70px rgba(59,240,255,0.2);
+  --radius:24px;
 }
 
-/* Light theme overrides */
-.light{background:#f6f8fb;color:#08121a}
-.light body{}
-.light .stage{background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.04));}
-.light canvas{background:#fff;border:1px solid #e6e6e6}
-.light .title{color:#0b5bd6;text-shadow:none}
-.light .btn{color:#05202a;border:1px solid rgba(2,8,23,0.06)}
-.light .btn.primary{color:#fff}
+body.light{
+  /* Light Theme */
+  --bg:#f6f8fb;
+  --bg-secondary:#f0f2f8;
+  --bg-tertiary:#e8eef5;
+  --text-primary:#08121a;
+  --text-secondary:#3a4a5a;
+  --border-color:rgba(0,100,200,0.1);
+  --border-color-strong:rgba(0,100,200,0.2);
+  --neon-cyan:#0077cc;
+  --neon-purple:#9900cc;
+  --accent:linear-gradient(90deg,var(--neon-cyan),var(--neon-purple));
+  --shadow-sm:0 4px 12px rgba(0,0,0,0.1);
+  --shadow-md:0 8px 24px rgba(0,0,0,0.12);
+  --shadow-lg:0 20px 60px rgba(0,0,0,0.15);
+  --glow-sm:0 0 12px rgba(0,119,204,0.1);
+  --glow-md:0 0 24px rgba(0,119,204,0.12);
+  --glow-lg:0 0 40px rgba(0,119,204,0.15);
+}
 
-/* stronger glow for dark mode (default) */
-body:not(.light) .canvas-border-glow{box-shadow:0 0 34px rgba(59,240,255,0.28), inset 0 0 28px rgba(59,240,255,0.10);border-color:rgba(59,240,255,0.18)}
-/* light theme glow color */
-.light .canvas-border-glow{box-shadow:0 0 24px rgba(255,90,140,0.18), inset 0 0 16px rgba(255,90,140,0.06);border-color:rgba(255,90,140,0.14)}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:var(--bg);font-family:Inter, Poppins, system-ui, -apple-system, Arial;color:var(--text-primary);transition:background .3s,color .3s}
+body{display:flex;align-items:center;justify-content:center;background:radial-gradient(1000px 500px at 10% 10%, rgba(59,240,255,0.02), transparent), radial-gradient(800px 400px at 90% 90%, rgba(255,59,202,0.01), transparent), var(--bg)}
+body.light{background:radial-gradient(1000px 500px at 10% 10%, rgba(0,119,204,0.02), transparent), radial-gradient(800px 400px at 90% 90%, rgba(153,0,204,0.01), transparent), var(--bg)}
 
-/* Skins UI */
-.skins-section{margin-top:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
-.skins{display:flex;gap:8px}
-.skin-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:#dff8ff;cursor:pointer;width:84px}
-.skin-btn .swatch{width:56px;height:28px;border-radius:6px;display:block;border:1px solid rgba(0,0,0,0.2)}
-.skin-btn small{font-size:11px;opacity:0.85}
-.skin-btn.locked{opacity:0.35;filter:grayscale(40%);cursor:not-allowed}
-.skin-btn.selected{outline:2px solid rgba(255,255,255,0.06);box-shadow:0 8px 28px rgba(59,240,255,0.06)}
-.swatch.classic{background:linear-gradient(90deg,#0f0,#6f6)}
-.swatch.neon{background:linear-gradient(90deg,#3bf0ff,#7ef2d6)}
-.swatch.gradient{background:linear-gradient(90deg,#ff3bca,#3bf0ff)}
-.swatch.gold{background:linear-gradient(90deg,#ffd700,#ffecb3)}
-.swatch.shadow{background:linear-gradient(90deg,#c16cff,#8b5fbf)}
+/* Main fullscreen app container */
+.page{width:100vw;height:100vh;padding:12px;overflow:hidden;background:transparent;display:flex;flex-direction:column;gap:12px}
 
-/* Types UI */
-.types-section{margin-top:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
-.types{display:flex;gap:8px}
-.type-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:#dff8ff;cursor:pointer;width:84px}
-.type-btn.locked{opacity:0.35;filter:grayscale(40%);cursor:not-allowed}
-.type-btn.selected{outline:2px solid rgba(255,255,255,0.06);box-shadow:0 8px 28px rgba(59,240,255,0.06)}
-.type-swatch{width:56px;height:28px;border-radius:6px;display:block;border:1px solid rgba(0,0,0,0.2);background:linear-gradient(90deg,#888,#555)}
-.type-swatch.block{background:linear-gradient(90deg,#6f6,#3bf0ff)}
-.type-swatch.rounded{background:linear-gradient(90deg,#ff3bca,#7ef2d6)}
-.type-swatch.pixel{background:linear-gradient(90deg,#ffd700,#c16cff)}
-.type-swatch.fat{background:linear-gradient(90deg,#7aebff,#d6a1ff)}
+/* Navbar - compact and futuristic */
+.topbar{width:100%;height:7vh;min-height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 1.8rem;background:linear-gradient(180deg,var(--bg-tertiary),var(--bg-secondary));color:var(--neon-cyan);box-shadow:var(--shadow-md), inset 0 -2px 20px var(--glow-sm);border-radius:20px;border:1px solid var(--border-color);transition:all .3s}
+.topbar-left{display:flex;align-items:center;gap:1.2rem}
+.icon-btn{background:transparent;border:none;color:var(--neon-cyan);font-size:1.4rem;cursor:pointer;transition:all .2s;padding:0.4rem}
+.icon-btn:hover{transform:scale(1.15);filter:drop-shadow(0 0 8px var(--neon-cyan))}
+.top-title{font-family:Orbitron, sans-serif;font-weight:900;color:var(--neon-cyan);text-shadow:0 0 20px var(--glow-sm);letter-spacing:2.5px;font-size:1.6rem;transition:all .3s}
+.topbar-right .scores{display:flex;gap:1.8rem;align-items:center;font-weight:700}
+.topbar-right .scores div{display:flex;flex-direction:column;font-size:0.95rem;text-align:right;gap:0.3rem}
+
+/* Main content layout: sidebar + game */
+.main{display:flex;gap:18px;padding:0;height:calc(100vh - 7vh - 36px);align-items:stretch;width:100%;flex-wrap:nowrap}
+
+/* Left control panel */
+.sidebar{flex:0 0 21%;min-width:260px;max-width:320px;height:100%;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.04));border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;backdrop-filter:blur(10px);border:1px solid var(--border-color);overflow-y:auto;overflow-x:hidden;box-shadow:var(--shadow-md), inset 0 0 20px var(--glow-sm);transition:all .3s}
+body.light .sidebar{background:linear-gradient(180deg, rgba(255,255,255,0.7), rgba(240,242,248,0.5));border:1px solid var(--border-color)}
+.sidebar .controls{display:flex;flex-direction:column;gap:10px}
+.sidebar .hint{font-size:0.85rem;opacity:0.75;margin-top:auto;padding-top:12px;border-top:1px solid var(--border-color)}
+
+/* Custom scrollbar for sidebar */
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(59,240,255,0.3);border-radius:10px;transition:background .2s}
+.sidebar::-webkit-scrollbar-thumb:hover{background:rgba(59,240,255,0.6)}
+body.light .sidebar::-webkit-scrollbar-thumb{background:rgba(0,119,204,0.3)}
+body.light .sidebar::-webkit-scrollbar-thumb:hover{background:rgba(0,119,204,0.6)}
+
+/* Right game section */
+.large-stage{flex:1 1 79%;height:100%;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.stage{width:100%;height:100%;border-radius:24px;padding:10px;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden;background:linear-gradient(180deg,var(--bg-tertiary),var(--bg-secondary));border:2px solid var(--border-color);box-shadow:var(--shadow-lg), inset 0 0 50px var(--glow-sm);transition:all .3s}
+body.light .stage{background:linear-gradient(180deg,#f8f9fc,#f0f2f8);border:2px solid var(--border-color)}
+
+/* Game wrapper - centers canvas with proper aspect ratio */
+.stage::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);background-size:50px 50px;opacity:0.05;animation:gridPan 16s linear infinite;pointer-events:none;z-index:1;border-radius:20px}
+body.light .stage::before{opacity:0.08}
+@keyframes gridPan{0%{background-position:0 0}100%{background-position:50px 50px}}
+
+canvas{background:linear-gradient(180deg,var(--bg-tertiary),var(--bg-secondary));border-radius:20px;border:4px solid rgba(59,240,255,0.12);box-shadow:var(--glow-md), var(--shadow-lg);width:100%;height:auto;max-height:82vh;aspect-ratio:1.6/1;display:block;position:relative;z-index:2;object-fit:contain;transition:all .3s}
+body.light canvas{background:linear-gradient(180deg,#fafbfd,#f8f9fc);border:4px solid rgba(0,119,204,0.2)}
+
+/* Canvas glow when game is active */
+.canvas-border-glow{box-shadow:var(--glow-lg), inset 0 0 50px var(--glow-sm)}
+
+/* Buttons - professional arcade style */
+.btn{background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));border:1px solid var(--border-color);padding:0.8rem 1.2rem;border-radius:16px;color:var(--text-primary);cursor:pointer;font-weight:700;transition:all .2s;width:100%;height:54px;min-height:54px;display:flex;align-items:center;justify-content:center;font-size:0.95rem}
+body.light .btn{background:linear-gradient(180deg, rgba(0,119,204,0.06), rgba(0,119,204,0.02));border:1px solid var(--border-color)}
+.btn.primary{background:var(--accent);color:#fff;border:none;box-shadow:var(--glow-sm);font-weight:900;text-shadow:0 0 8px rgba(0,0,0,0.3)}
+body.light .btn.primary{color:#fff;text-shadow:none}
+.btn:hover{transform:translateY(-4px);box-shadow:var(--glow-md);background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))}
+body.light .btn:hover{background:linear-gradient(180deg, rgba(0,119,204,0.12), rgba(0,119,204,0.05));box-shadow:var(--glow-sm)}
+.btn:active{transform:translateY(-2px)}
+.btn.primary:hover{box-shadow:var(--glow-lg)}
+
+.controls{display:flex;flex-direction:column;gap:10px}
+.speed-controls,.level-controls,.skins-section,.types-section{display:flex;flex-direction:column;gap:10px}
+.speed-controls label,.level-controls label,.skins-section label,.types-section label{font-weight:700;color:var(--neon-cyan);font-size:0.9rem;text-shadow:0 0 12px var(--glow-sm);letter-spacing:0.5px;transition:all .3s}
+body.light .speed-controls label,body.light .level-controls label,body.light .skins-section label,body.light .types-section label{color:#0077cc;text-shadow:none}
+.speed-group,.level-buttons,.skins,.types{display:flex;gap:8px;flex-wrap:wrap}
+.skin-btn,.type-btn,.level-btn{padding:8px 10px;border-radius:12px;border:1px solid var(--border-color);background:transparent;cursor:pointer;text-align:center;font-size:0.8rem;transition:all .2s;font-weight:600;color:var(--text-primary);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.skin-btn,.type-btn{min-width:65px}
+.level-btn{min-width:50px;min-height:40px;padding:6px 8px}
+.skin-btn:hover,.type-btn:hover,.level-btn:hover{border-color:var(--border-color-strong);background:rgba(59,240,255,0.08);box-shadow:var(--glow-sm);transform:translateY(-2px)}
+body.light .skin-btn:hover,body.light .type-btn:hover,body.light .level-btn:hover{background:rgba(0,119,204,0.08)}
+.skin-btn.selected,.type-btn.selected,.level-btn.unlocked{border-color:var(--neon-cyan);background:rgba(59,240,255,0.15);box-shadow:var(--glow-md);font-weight:700}
+body.light .skin-btn.selected,body.light .type-btn.selected,body.light .level-btn.unlocked{border-color:#0077cc;background:rgba(0,119,204,0.15)}
+.skin-btn.locked,.type-btn.locked,.level-btn.locked{opacity:0.4;cursor:not-allowed;border-color:var(--border-color)}
+.skin-btn:disabled,.type-btn:disabled,.level-btn:disabled{cursor:not-allowed;opacity:0.5;pointer-events:none}
 
 /* Modal styles */
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:40}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);z-index:50}
 .modal[aria-hidden="false"]{display:flex}
-.modal-content{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.2));padding:20px;border-radius:12px;min-width:260px;text-align:center;border:1px solid rgba(255,255,255,0.04)}
-.modal-content h2{font-family:Orbitron, sans-serif;color:#ff7ad9;margin-bottom:8px}
-.modal-content p{margin-bottom:12px;color:#dceff2}
-.modal-actions{display:flex;justify-content:center}
+body.light .modal{background:rgba(0,0,0,0.5)}
+.modal-content{background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.1));padding:2rem;border-radius:20px;min-width:300px;text-align:center;border:1px solid rgba(59,240,255,0.12);box-shadow:var(--shadow-lg);transition:all .3s}
+body.light .modal-content{background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(240,242,248,0.9));border:1px solid var(--border-color)}
+.modal-content h2{font-family:Orbitron, sans-serif;color:var(--neon-cyan);margin:0 0 1rem 0;text-shadow:0 0 16px var(--glow-sm);font-size:1.8rem;transition:all .3s}
+body.light .modal-content h2{text-shadow:none}
+.modal-content p{margin:0.5rem 0 1.5rem 0;color:var(--text-secondary);font-size:1.1rem}
+.modal-actions{display:flex;justify-content:center;gap:1rem}
+.modal-actions .btn{width:160px}
+
+/* Swatch indicators for skin/type buttons */
+.swatch,.type-swatch{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle;transition:all .2s}
+.skin-btn small,.type-btn small{display:block;font-size:0.65rem;margin-top:2px}
+.skin-btn{flex-direction:column;align-items:center;gap:2px;padding:6px 8px}
+.type-btn{flex-direction:column;align-items:center;gap:2px;padding:6px 8px}
+
+/* Responsive for smaller laptops */
+@media (max-width:1400px){.sidebar{flex:0 0 23%}.topbar{padding:0 1.2rem}}
+@media (max-width:1100px){.sidebar{flex:0 0 25%;min-width:240px}}
+@media (max-width:900px){.main{flex-direction:column;height:auto}.sidebar{flex:0 0 auto;width:100%;max-width:none;order:2;max-height:35vh}.large-stage{order:1;flex:1 1 50vh}.page{height:100vh}canvas{max-height:50vh}}
+
