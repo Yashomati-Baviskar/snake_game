@@ -59,6 +59,18 @@ body:not(.light) .canvas-border-glow{box-shadow:0 0 34px rgba(59,240,255,0.28), 
 .swatch.gold{background:linear-gradient(90deg,#ffd700,#ffecb3)}
 .swatch.shadow{background:linear-gradient(90deg,#c16cff,#8b5fbf)}
 
+/* Types UI */
+.types-section{margin-top:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.types{display:flex;gap:8px}
+.type-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:#dff8ff;cursor:pointer;width:84px}
+.type-btn.locked{opacity:0.35;filter:grayscale(40%);cursor:not-allowed}
+.type-btn.selected{outline:2px solid rgba(255,255,255,0.06);box-shadow:0 8px 28px rgba(59,240,255,0.06)}
+.type-swatch{width:56px;height:28px;border-radius:6px;display:block;border:1px solid rgba(0,0,0,0.2);background:linear-gradient(90deg,#888,#555)}
+.type-swatch.block{background:linear-gradient(90deg,#6f6,#3bf0ff)}
+.type-swatch.rounded{background:linear-gradient(90deg,#ff3bca,#7ef2d6)}
+.type-swatch.pixel{background:linear-gradient(90deg,#ffd700,#c16cff)}
+.type-swatch.fat{background:linear-gradient(90deg,#7aebff,#d6a1ff)}
+
 /* Modal styles */
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:40}
 .modal[aria-hidden="false"]{display:flex}

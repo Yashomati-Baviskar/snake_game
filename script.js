@@ -12,6 +12,7 @@
   const speedFast = document.getElementById('speedFast');
   const levelButtons = Array.from(document.querySelectorAll('.level-btn'));
   const skinButtons = Array.from(document.querySelectorAll('.skin-btn'));
+  const typeButtons = Array.from(document.querySelectorAll('.type-btn'));
   const gameOverModal = document.getElementById('gameOverModal');
   const modalScore = document.getElementById('modalScore');
   const modalRestartBtn = document.getElementById('modalRestartBtn');
@@ -25,6 +26,16 @@
     shadow: {req:50, head:'#c16cff', body:'#8b5fbf', shadow:'#c16cff'},
   };
   let selectedSkin = localStorage.getItem(SKIN_KEY) || 'classic';
+
+  // snake types (visual styles) with required score thresholds
+  const TYPE_KEY = 'snake_type';
+  const typesConfig = {
+    block: {req:0},
+    rounded: {req:15},
+    pixel: {req:30},
+    fat: {req:45},
+  };
+  let selectedType = localStorage.getItem(TYPE_KEY) || 'block';
 
   const TILE = 20;
   const COLS = Math.floor(canvas.width / TILE);
@@ -72,8 +83,11 @@
   function playGameOver(){ playTone(200,0.3,0.08,'sine'); }
 
   function reset(){
-    snake = [{x:Math.floor(COLS/2),y:Math.floor(ROWS/2)}];
-    dir={x:1,y:0}; score=0; level=1; unlockedLevel=1; selectedSpeed='med'; tickDelay=baseSpeeds[selectedSpeed]; running=false; updateScore(); placeFood(); draw();
+    // start the snake just outside the top wall so it comes in from outside
+    snake = [{x: Math.floor(COLS/2), y: -1}];
+    // move inward from the top
+    dir = {x:0, y:1};
+    score=0; level=1; unlockedLevel=1; selectedSpeed='med'; tickDelay=baseSpeeds[selectedSpeed]; running=false; updateScore(); placeFood(); draw();
     clearInterval(tickInterval);
     canvas.classList.remove('canvas-border-glow');
   }
@@ -90,11 +104,31 @@
     });
   }
 
+  function updateTypeButtons(){
+    if(!typeButtons) return;
+    typeButtons.forEach(b=>{
+      const key = b.dataset.type;
+      const req = parseInt(b.dataset.required||'0',10);
+      if(score>=req){ b.classList.remove('locked'); b.classList.add('unlocked'); b.disabled=false; }
+      else { b.classList.add('locked'); b.classList.remove('unlocked'); b.disabled=true; }
+      if(key===selectedType){ b.classList.add('selected'); } else { b.classList.remove('selected'); }
+    });
+  }
+
   skinButtons.forEach(b=>{
     b.addEventListener('click', ()=>{
       const key = b.dataset.skin;
       const req = parseInt(b.dataset.required||'0',10);
       if(score>=req){ selectedSkin = key; localStorage.setItem(SKIN_KEY, selectedSkin); updateSkinButtons(); }
+    });
+  });
+
+  // type button interactions
+  typeButtons.forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const key = b.dataset.type;
+      const req = parseInt(b.dataset.required||'0',10);
+      if(score>=req){ selectedType = key; localStorage.setItem(TYPE_KEY, selectedType); updateTypeButtons(); }
     });
   });
 
@@ -116,7 +150,10 @@
         tickDelay = Math.max(40, baseSpeeds[selectedSpeed] - (level-1)*12);
         playLevel(); updateLevelButtons(); updateInterval();
       } else { playEat(); }
-      placeFood(); updateScore(); updateSkinButtons();
+      placeFood(); updateScore();
+      // automatically update skin/type when score increases
+      autoUpdateCosmetics();
+      updateSkinButtons(); updateTypeButtons();
     } else { snake.pop(); }
   }
 
@@ -150,9 +187,40 @@
         ctx.fillStyle = globalBodyStyle || skin.body || '#7ef2d6';
         ctx.shadowBlur = 6;
       }
-      ctx.fillRect(s.x*TILE+2, s.y*TILE+2, TILE-4, TILE-4);
+      const px = s.x * TILE;
+      const py = s.y * TILE;
+      if(selectedType === 'rounded'){
+        ctx.beginPath();
+        ctx.arc(px + TILE/2, py + TILE/2, (TILE-4)/2, 0, Math.PI*2);
+        ctx.fill();
+      } else if(selectedType === 'pixel'){
+        const sz = Math.max(6, Math.floor(TILE/2));
+        ctx.fillRect(px + Math.floor(TILE/2 - sz/2), py + Math.floor(TILE/2 - sz/2), sz, sz);
+      } else if(selectedType === 'fat'){
+        ctx.fillRect(px + 1, py + 1, TILE-2, TILE-2);
+      } else {
+        ctx.fillRect(px + 2, py + 2, TILE-4, TILE-4);
+      }
       ctx.shadowBlur=0;
     });
+  }
+
+  // automatically choose the highest unlocked skin/type based on current score
+  function autoUpdateCosmetics(){
+    // skins
+    let bestSkin = selectedSkin;
+    Object.keys(skinsConfig).forEach(k=>{
+      const req = skinsConfig[k].req || 0;
+      if(score>=req){ bestSkin = k; }
+    });
+    if(bestSkin !== selectedSkin){ selectedSkin = bestSkin; localStorage.setItem(SKIN_KEY, selectedSkin); }
+    // types
+    let bestType = selectedType;
+    Object.keys(typesConfig).forEach(k=>{
+      const req = typesConfig[k].req || 0;
+      if(score>=req){ bestType = k; }
+    });
+    if(bestType !== selectedType){ selectedType = bestType; localStorage.setItem(TYPE_KEY, selectedType); }
   }
 
   function startGame(){
@@ -266,4 +334,4 @@
   });
 
   // init
-  reset(); setSpeed(selectedSpeed); updateLevelButtons(); updateSkinButtons(); draw();
+  reset(); setSpeed(selectedSpeed); updateLevelButtons(); updateSkinButtons(); updateTypeButtons(); draw();
