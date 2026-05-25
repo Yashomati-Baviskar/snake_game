@@ -14,7 +14,7 @@ Features implemented:
 
 To run locally, open `index.html` in a browser (double-click or serve with a static server).
 
-This repository now contains a very small, minimal Snake game.
+This repository contains `Snake Arcade`, a compact neon-styled Snake game with levels and simple sound effects.
 
 To run:
 
@@ -26,10 +26,17 @@ python3 -m http.server 8000
 Controls:
 - Arrow keys to move
 - Space to restart
+- Start / Pause / Restart buttons available
+
+Features:
+- Neon UI with Orbitron/Poppins fonts
+- Wall highlight glow while playing
+- Sound effects for eating, leveling, and game over (WebAudio)
+- Level system: every 5 points increases level and speed
 
 Files:
-- `index.html` — page with canvas
-- `styles.css` — minimal styles
-- `script.js` — simple game logic
+- `index.html` — page and HUD
+- `styles.css` — neon styling and light theme
+- `script.js` — game logic, audio, levels
 
-Enjoy! 🎮
+Enjoy and feel free to ask for touch controls or persistence for theme preferences.

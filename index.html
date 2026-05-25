@@ -3,14 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Snake Arena</title>
+  <title>Snake Arcade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="hud">
-    <h1 class="title">Simple Snake</h1>
+    <h1 class="title">Snake Arcade</h1>
     <div class="scores">
       <div>Score: <span id="score">0</span></div>
+      <div>Level: <span id="level">1</span></div>
       <div>High: <span id="high">0</span></div>
     </div>
   </header>
@@ -24,6 +26,26 @@
     <button id="pauseBtn" class="btn">Pause</button>
     <button id="restartBtn" class="btn">Restart</button>
     <button id="themeBtn" class="btn">Light</button>
+  </div>
+
+  <div class="speed-controls">
+    <label>Speed:</label>
+    <div class="speed-group">
+      <button id="speedSlow" class="btn">Slow</button>
+      <button id="speedMed" class="btn primary">Medium</button>
+      <button id="speedFast" class="btn">Fast</button>
+    </div>
+  </div>
+
+  <div class="level-controls">
+    <label>Levels:</label>
+    <div id="levelButtons" class="level-buttons">
+      <button class="level-btn" data-level="1">1</button>
+      <button class="level-btn" data-level="2">2</button>
+      <button class="level-btn" data-level="3">3</button>
+      <button class="level-btn" data-level="4">4</button>
+      <button class="level-btn" data-level="5">5</button>
+    </div>
   </div>
 
   <div class="hint">Use arrow keys to move. Press Space to restart.</div>

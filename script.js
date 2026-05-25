@@ -7,17 +7,26 @@
   const pauseBtn = document.getElementById('pauseBtn');
   const restartBtn = document.getElementById('restartBtn');
   const themeBtn = document.getElementById('themeBtn');
+  const speedSlow = document.getElementById('speedSlow');
+  const speedMed = document.getElementById('speedMed');
+  const speedFast = document.getElementById('speedFast');
+  const levelButtons = Array.from(document.querySelectorAll('.level-btn'));
 
   const TILE = 20;
   const COLS = Math.floor(canvas.width / TILE);
   const ROWS = Math.floor(canvas.height / TILE);
-
   let snake = [{x:5,y:5}];
   let dir = {x:1,y:0};
   let food = null;
   let score = 0;
+  let level = 1;
+  const levelEl = document.getElementById('level');
+  let tickDelay = 120; // ms
   let running = false;
   let tickInterval = null;
+  let selectedSpeed = 'med';
+  const baseSpeeds = { slow: 180, med: 120, fast: 70 };
+  let unlockedLevel = 1; // highest unlocked level
 
   const HIGH_KEY = 'simple_snake_high';
   let highscore = parseInt(localStorage.getItem(HIGH_KEY) || '0', 10);
@@ -31,13 +40,31 @@
     }
   }
 
+  // audio
+  const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  function playTone(freq, time=0.08, vol=0.05, type='sine'){
+    try{
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      setTimeout(()=>{ o.stop(); }, time*1000);
+    }catch(e){}
+  }
+  function playEat(){ playTone(900,0.06,0.06,'sine'); }
+  function playLevel(){ playTone(1200,0.12,0.08,'sawtooth'); }
+  function playGameOver(){ playTone(200,0.3,0.08,'sine'); }
+
   function reset(){
     snake = [{x:Math.floor(COLS/2),y:Math.floor(ROWS/2)}];
-    dir={x:1,y:0}; score=0; running=false; updateScore(); placeFood(); draw();
+    dir={x:1,y:0}; score=0; level=1; unlockedLevel=1; selectedSpeed='med'; tickDelay=baseSpeeds[selectedSpeed]; running=false; updateScore(); placeFood(); draw();
     clearInterval(tickInterval);
+    canvas.classList.remove('canvas-border-glow');
   }
 
-  function updateScore(){ scoreEl.textContent = score; highEl.textContent = highscore; }
+  function updateScore(){ scoreEl.textContent = score; highEl.textContent = highscore; levelEl.textContent = level; }
 
   function tick(){
     if(!running) return;
@@ -47,7 +74,18 @@
     // self
     if(snake.some(s=>s.x===head.x&&s.y===head.y)){ endGame(); return; }
     snake.unshift(head);
-    if(food && head.x===food.x&&head.y===food.y){ score++; placeFood(); updateScore(); } else { snake.pop(); }
+    if(food && head.x===food.x&&head.y===food.y){
+      score++;
+      // level up every 5 points
+      if(score % 5 === 0){
+        level++;
+        unlockedLevel = Math.max(unlockedLevel, level);
+        // recompute tickDelay based on selected speed and new level
+        tickDelay = Math.max(40, baseSpeeds[selectedSpeed] - (level-1)*12);
+        playLevel(); updateLevelButtons(); updateInterval();
+      } else { playEat(); }
+      placeFood(); updateScore();
+    } else { snake.pop(); }
   }
 
   function draw(){
@@ -71,7 +109,7 @@
   }
 
   function startGame(){
-    if(!running){ running=true; clearInterval(tickInterval); tickInterval = setInterval(()=>{ tick(); draw(); }, 120); pauseBtn.textContent = 'Pause'; }
+    if(!running){ running=true; clearInterval(tickInterval); tickInterval = setInterval(()=>{ tick(); draw(); }, tickDelay); pauseBtn.textContent = 'Pause'; canvas.classList.add('canvas-border-glow'); }
   }
 
   function togglePause(){
@@ -82,12 +120,52 @@
     }
   }
 
-  function endGame(){ running=false; clearInterval(tickInterval); if(score>highscore){ highscore=score; localStorage.setItem(HIGH_KEY,String(highscore)); } updateScore(); }
+  function updateInterval(){
+    if(tickInterval) clearInterval(tickInterval);
+    if(running) tickInterval = setInterval(()=>{ tick(); draw(); }, tickDelay);
+  }
+
+  function endGame(){ running=false; clearInterval(tickInterval); canvas.classList.remove('canvas-border-glow'); playGameOver(); if(score>highscore){ highscore=score; localStorage.setItem(HIGH_KEY,String(highscore)); } updateScore(); }
 
   // controls
   startBtn.addEventListener('click', ()=>{ startGame(); });
   pauseBtn.addEventListener('click', ()=>{ togglePause(); });
   restartBtn.addEventListener('click', ()=>{ reset(); });
+
+  // speed controls
+  function setSpeed(key){
+    if(!baseSpeeds[key]) return;
+    selectedSpeed = key;
+    // recalc tickDelay based on level
+    tickDelay = Math.max(40, baseSpeeds[selectedSpeed] - (level-1)*12);
+    updateInterval();
+    // UI selection
+    speedSlow.classList.remove('primary'); speedMed.classList.remove('primary'); speedFast.classList.remove('primary');
+    if(key==='slow') speedSlow.classList.add('primary');
+    if(key==='med') speedMed.classList.add('primary');
+    if(key==='fast') speedFast.classList.add('primary');
+  }
+  speedSlow.addEventListener('click', ()=>setSpeed('slow'));
+  speedMed.addEventListener('click', ()=>setSpeed('med'));
+  speedFast.addEventListener('click', ()=>setSpeed('fast'));
+
+  // level buttons
+  function updateLevelButtons(){
+    levelButtons.forEach(b=>{
+      const lvl = parseInt(b.dataset.level,10);
+      if(lvl<=unlockedLevel){ b.classList.add('unlocked'); b.classList.remove('locked'); b.disabled=false; }
+      else { b.classList.add('locked'); b.classList.remove('unlocked'); b.disabled=true; }
+    });
+  }
+  levelButtons.forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const lvl = parseInt(b.dataset.level,10);
+      if(lvl<=unlockedLevel){ level = lvl; tickDelay = Math.max(40, baseSpeeds[selectedSpeed] - (level-1)*12); updateScore(); updateInterval(); }
+    });
+  });
+  // init UI
+  setSpeed(selectedSpeed);
+  updateLevelButtons();
 
   // theme toggle
   themeBtn.addEventListener('click', ()=>{
@@ -120,4 +198,4 @@
   });
 
   // init
-  reset(); draw();
+  reset(); setSpeed(selectedSpeed); updateLevelButtons(); draw();
