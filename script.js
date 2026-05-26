@@ -139,22 +139,6 @@
     canvas.classList.remove('canvas-border-glow');
   }
 
-  // Reset snake to enter from top of playable area (for unknown key press)
-  function resetSnakeFromTop(){
-    // Position snake at top row, just above playable area to enter downward
-    const centerX = playAreaX + Math.floor(playAreaWidth / 2);
-    const startY = playAreaY; // First row of playable area
-    snake = [{x: centerX, y: startY - 1}];
-    // Move downward
-    dir = {x:0, y:1};
-    score=0; level=1; unlockedLevel=1; selectedSpeed='med'; tickDelay=baseSpeeds[selectedSpeed]; updateScore(); placeFood(); draw();
-    // Stop any running game
-    running = false;
-    if(rafId) cancelAnimationFrame(rafId);
-    rafId = null; lastFrameTime = 0; accumulator = 0;
-    canvas.classList.remove('canvas-border-glow');
-  }
-
   function updateScore(){ scoreEl.textContent = score; highEl.textContent = highscore; levelEl.textContent = level; }
 
   function updateSkinButtons(){
@@ -450,10 +434,11 @@
 
   // keyboard with pause on unwanted keys
   function isControlKey(e){
-    const k = e.key;
+    const k = e.key.toLowerCase();
     const code = e.code;
     if(code==='Space') return true;
-    if(k==='ArrowUp' || k==='ArrowDown' || k==='ArrowLeft' || k==='ArrowRight') return true;
+    if(k==='arrowup' || k==='arrowdown' || k==='arrowleft' || k==='arrowright') return true;
+    if(k==='w' || k==='a' || k==='s' || k==='d') return true;
     return false;
   }
 
@@ -461,14 +446,15 @@
     if(isControlKey(e)){
       // prevent default page scrolling for arrows/space
       e.preventDefault();
-      if(e.key==='ArrowUp' && dir.y===0) dir={x:0,y:-1};
-      if(e.key==='ArrowDown' && dir.y===0) dir={x:0,y:1};
-      if(e.key==='ArrowLeft' && dir.x===0) dir={x:-1,y:0};
-      if(e.key==='ArrowRight' && dir.x===0) dir={x:1,y:0};
+      const k = e.key.toLowerCase();
+      if(k==='arrowup' || k==='w') { if(dir.y===0) dir={x:0,y:-1}; }
+      if(k==='arrowdown' || k==='s') { if(dir.y===0) dir={x:0,y:1}; }
+      if(k==='arrowleft' || k==='a') { if(dir.x===0) dir={x:-1,y:0}; }
+      if(k==='arrowright' || k==='d') { if(dir.x===0) dir={x:1,y:0}; }
       if(e.code==='Space') reset();
     } else {
-      // Unknown key: pause game and reset snake to enter from top row
-      resetSnakeFromTop();
+      // Any other key: pause the game
+      if(running) togglePause();
     }
   });
 
